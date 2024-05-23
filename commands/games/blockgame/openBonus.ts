@@ -43,8 +43,13 @@ export default class OpenBonusCommand extends Command {
       return message.reply({
         embeds: [
           CommandEmbed.info({
-            title: "Использование команды",
-            content: "openbonus <simple или extra>"
+            title: "Открытие бонусов",
+            content:
+              "В данный момент у вас бонусов:" +
+              "```json\n" +
+              JSON.stringify(profile.blockgame.bonuses, null, 2) +
+              "```" +
+              `Использование команды: \`${client.config.bot.prefix}openbonus <simple или extra>\``
           })
         ]
       });

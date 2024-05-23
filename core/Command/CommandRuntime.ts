@@ -3,6 +3,7 @@ import Config from "../Config";
 import CustomClient from "../CustomClient";
 import Logger from "../Logger";
 import Command from ".";
+import CommandEmbed from "./CommandEmbed";
 const log = new Logger("CommandRuntime");
 
 export default class CommandRuntime {
@@ -62,8 +63,22 @@ export default class CommandRuntime {
         c.prefixCommandInfo.names.includes(commandName)
       );
       if (!command) return;
-      args.shift();
 
+      if (
+        command.prefixCommandInfo.permission &&
+        !msg.member?.permissions.has(command.prefixCommandInfo.permission)
+      ) {
+        msg.reply({
+          embeds: [
+            CommandEmbed.error({
+              content: "You haven't permissions to use that command!"
+            })
+          ]
+        });
+        return;
+      }
+
+      args.shift();
       try {
         if (command.runPrefix)
           command.runPrefix(msg, args, this.client).catch(log.error);

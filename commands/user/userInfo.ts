@@ -94,6 +94,7 @@ export default class UserInfoCommand extends Command {
   }
 
   private listenMessages(client: CustomClient) {
+    let timeoutList: string[] = [];
     client.on(Events.MessageCreate, async (message) => {
       if (
         message.author.bot ||
@@ -104,9 +105,19 @@ export default class UserInfoCommand extends Command {
         return;
 
       const profile = this.getUserInfo(message);
-      profile.experience++;
-      profile.coins++;
-      profile.blockgame.blocks += profile.blockgame.bpm;
+      const uid = message.author.id;
+      if (!timeoutList.includes(uid)) {
+        profile.experience++;
+        profile.coins++;
+        profile.blockgame.blocks += profile.blockgame.bpm;
+        timeoutList.push(uid);
+        const banid = Math.floor(Math.random() * 1000);
+        setTimeout(() => {
+          if (timeoutList.includes(uid)) {
+            timeoutList.splice(timeoutList.indexOf(uid), 1);
+          }
+        }, 45000);
+      }
       if (profile.experience >= this.getExpFromTo(1, profile.level + 1)) {
         profile.level++;
         profile.messages.created++;

@@ -1,8 +1,6 @@
 import {
   ApplicationCommandOptionType,
-  ChatInputCommandInteraction,
   CommandInteraction,
-  GuildBasedChannel,
   Message,
   SlashCommandBuilder
 } from "discord.js";
@@ -94,21 +92,21 @@ export default abstract class Command {
     this.configFolder = configFolder;
   }
 
-  readConfig(): any | boolean {
+  readConfig<config = any>(): config | undefined {
     const cfg = this.getCfgPath();
     try {
       return JSON.parse(fs.readFileSync(cfg, { encoding: "utf-8" }));
     } catch {
-      return false;
+      return;
     }
   }
 
-  writeConfig(data: any) {
+  writeConfig<config = any>(data: config): config {
     const dir = this.getCfgDir();
     const cfg = this.getCfgPath();
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(cfg, JSON.stringify(data));
-    return true;
+    return data;
   }
 
   deleteConfig() {
