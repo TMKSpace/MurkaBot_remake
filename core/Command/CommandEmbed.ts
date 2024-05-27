@@ -9,7 +9,6 @@ type EmbedOptions = {
 
 export default class CommandEmbed {
   static embed(options: EmbedOptions) {
-    if (typeof options == "string") options = { content: options };
     return new EmbedBuilder()
       .setColor(options.color ?? null)
       .setTitle(options.title ?? null)
@@ -18,16 +17,25 @@ export default class CommandEmbed {
       .setTimestamp()
       .setFooter({ text: "Все права обмяуканы 2023-2024" });
   }
-  static error(options: EmbedOptions) {
-    return this.embed(options).setColor(options.color ?? 0xff0000);
+
+  private static embedcolored(
+    options: EmbedOptions | string,
+    defaultColor: ColorResolvable | null
+  ) {
+    options = typeof options == "string" ? { content: options } : options;
+    return this.embed(options).setColor(options.color ?? defaultColor);
   }
-  static warn(options: EmbedOptions) {
-    return this.embed(options).setColor(options.color ?? 0xffff00);
+
+  static error(options: EmbedOptions | string) {
+    return this.embedcolored(options, 0xff0000);
   }
-  static success(options: EmbedOptions) {
-    return this.embed(options).setColor(options.color ?? 0x00ff00);
+  static warn(options: EmbedOptions | string) {
+    return this.embedcolored(options, 0xffff00);
   }
-  static info(options: EmbedOptions) {
-    return this.embed(options).setColor(options.color ?? 0x0000ff);
+  static success(options: EmbedOptions | string) {
+    return this.embedcolored(options, 0x00ff00);
+  }
+  static info(options: EmbedOptions | string) {
+    return this.embedcolored(options, 0x0000ff);
   }
 }

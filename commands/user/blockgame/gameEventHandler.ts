@@ -9,11 +9,11 @@ import {
 import Command from "../../../core/Command";
 import CommandOptions from "../../../core/Command/CommandOptions";
 import CustomClient from "../../../core/CustomClient";
-import UserInfoCommand from "../../user/userInfo";
+import UserInfoCommand from "../userInfo";
 
 export default class GameEventHandler extends Command {
   constructor() {
-    super(new CommandOptions("blockgameeventhandler", { slash: false }));
+    super(new CommandOptions("event_blockgameeventhandler", { slash: false }));
   }
 
   async onInit(client: CustomClient): Promise<void> {
@@ -42,11 +42,14 @@ export default class GameEventHandler extends Command {
     const profile = ui.getUserInfo(message);
     if (profile.blockgame.picklevel <= 0) return;
 
-    const random = Math.random();
-    if (random <= 0.013) {
-      if (random <= 0.0034) profile.blockgame.bonuses.extra += 1;
-      else profile.blockgame.bonuses.simple += 1;
-      message.reply("Вы получили бонус!\nВозможно открыть через openbonus.");
+    const random = Math.random() * 100;
+    if (random <= 1.3) {
+      let bonus = "simple";
+      if (random <= 0.34) bonus = "extra";
+      profile.blockgame.bonuses[bonus] += 1;
+      message.reply(
+        `Вы получили \`${bonus}\` бонус!\nВозможно открыть через openbonus.`
+      );
     }
   }
 

@@ -57,8 +57,8 @@ export default class CommandRuntime {
       if (msg.author.bot || !msg.content.startsWith(prefix) || msg.webhookId)
         return;
 
-      const args = msg.content.split(" ");
-      const commandName = args[0].toLowerCase().slice(prefix.length);
+      const args = msg.content.slice(prefix.length).split(" ");
+      const commandName = args[0].toLowerCase();
       const command = this.client.prefCmd.find((c) =>
         c.prefixCommandInfo.names.includes(commandName)
       );

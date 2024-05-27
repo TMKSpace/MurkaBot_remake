@@ -2,7 +2,7 @@ import { Message, CommandInteraction, CacheType } from "discord.js";
 import Command from "../../../core/Command";
 import CommandOptions from "../../../core/Command/CommandOptions";
 import CustomClient from "../../../core/CustomClient";
-import UserInfoCommand from "../../user/userInfo";
+import UserInfoCommand from "../userInfo";
 import CommandEmbed from "../../../core/Command/CommandEmbed";
 
 export default class BuyPickaxeCommand extends Command {
@@ -38,8 +38,8 @@ export default class BuyPickaxeCommand extends Command {
         ]
       });
     profile.coins -= 10;
-    profile.blockgame.picklevel = 1;
-    profile.blockgame.bpm = 1;
+    profile.blockgame.picklevel++;
+    profile.blockgame.bpm++;
     message.reply({
       embeds: [CommandEmbed.success({ content: "Вы успешно купили кирку!" })]
     });

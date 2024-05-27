@@ -2,7 +2,7 @@ import { Message, CommandInteraction, CacheType } from "discord.js";
 import Command from "../../../core/Command";
 import CommandOptions from "../../../core/Command/CommandOptions";
 import CustomClient from "../../../core/CustomClient";
-import UserInfoCommand from "../../user/userInfo";
+import UserInfoCommand from "../userInfo";
 import CommandEmbed from "../../../core/Command/CommandEmbed";
 
 export default class OpenBonusCommand extends Command {
@@ -122,8 +122,10 @@ export default class OpenBonusCommand extends Command {
       return message.reply({
         embeds: [
           CommandEmbed.error({
-            title: "У вас нет бонусов!!!",
-            content: "Ахуеть да???"
+            title: "Ошибка",
+            content:
+              "Либо у вас нет бонусов, либо вы ошиблись с командой.\n" +
+              `Использование команды: \`${client.config.bot.prefix}openbonus <simple или extra>\``
           })
         ]
       });

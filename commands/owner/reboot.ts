@@ -9,18 +9,14 @@ import CommandOptions from "../../core/Command/CommandOptions";
 import CustomClient from "../../core/CustomClient";
 import ChildProcess from "child_process";
 import path from "path";
-import owner from "./owner";
 
 export default class RebootCommand extends Command {
+  ownerIds: string[];
+
   constructor() {
     super(new CommandOptions("reboot").setType({ prefix: true }));
 
-    this.slashCommandInfo.setDefaultMemberPermissions(
-      PermissionFlagsBits.Administrator
-    );
-    this.prefixCommandInfo.setDefaultMemberPermissions(
-      PermissionFlagsBits.Administrator
-    );
+    this.ownerIds = ["536257878429007873", "429307451825717250"];
   }
 
   async run(
@@ -29,7 +25,7 @@ export default class RebootCommand extends Command {
     client: CustomClient
   ): Promise<any> {
     if (
-      !owner.ownerIds.includes(
+      !this.ownerIds.includes(
         message instanceof Message ? message.author.id : message.user.id
       )
     )

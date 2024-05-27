@@ -25,6 +25,7 @@ export class UserInfo {
     bpm: number;
     picklevel: number;
     bonuses: {
+      [index: string]: number;
       simple: number;
       extra: number;
     };
@@ -106,12 +107,12 @@ export default class UserInfoCommand extends Command {
 
       const profile = this.getUserInfo(message);
       const uid = message.author.id;
+      profile.experience++;
+      profile.messages.created++;
       if (!timeoutList.includes(uid)) {
-        profile.experience++;
         profile.coins++;
         profile.blockgame.blocks += profile.blockgame.bpm;
         timeoutList.push(uid);
-        const banid = Math.floor(Math.random() * 1000);
         setTimeout(() => {
           if (timeoutList.includes(uid)) {
             timeoutList.splice(timeoutList.indexOf(uid), 1);
@@ -120,17 +121,26 @@ export default class UserInfoCommand extends Command {
       }
       if (profile.experience >= this.getExpFromTo(1, profile.level + 1)) {
         profile.level++;
-        profile.messages.created++;
         let content = `Вы (${profile.username}) выхуели до ${profile.level} уровня!`;
         if (profile.level % 10 == 0) {
           profile.blockgame.bpm++;
-          content += `\nТакже вы получили дополнительный блок за сообщение: ${profile.blockgame.bpm}`;
+          content += `\nТакже вы получили +1 в статистике \`Блок за сообщение\`: ${profile.blockgame.bpm}.`;
         }
         message.channel.send(content);
       }
     });
 
-    client.on(Events.MessageDelete, (message) => {});
+    client.on(Events.MessageDelete, (message) => {
+      if (
+        message.author?.bot ||
+        message.webhookId ||
+        message.content?.startsWith(client.config.bot.prefix) ||
+        message.channel.type == ChannelType.DM
+      )
+        return;
+      const profile = this.getUserInfo(message as Message);
+      profile.messages.deleted++;
+    });
   }
 
   getExpFromTo(from: number, to: number) {
@@ -156,6 +166,25 @@ export default class UserInfoCommand extends Command {
     } else userid = message.user.id;
 
     return this.getUserInfoFromUID(message, userid);
+  }
+
+  /** Returns user by userid or yourself. */
+  async getUser(
+    message: Message | CommandInteraction,
+    userid?: string
+  ): Promise<User> {
+    const users = await message.guild?.members.fetch();
+    if (userid && /<@[0-9]+>/i.test(userid))
+      userid = /[0-9]+/i.exec(userid)?.[0];
+    return userid
+      ? users?.get(userid)?.user ??
+          users?.find((u) => u.user.username == userid)?.user ??
+          this.getUserFromMessage(message)
+      : this.getUserFromMessage(message);
+  }
+
+  private getUserFromMessage(message: Message | CommandInteraction) {
+    return message instanceof Message ? message.author : message.user;
   }
 
   private async loadUserData() {
@@ -189,16 +218,10 @@ export default class UserInfoCommand extends Command {
     args: string[],
     client: CustomClient
   ): Promise<any> {
-    const uid = /[0-9]+/i.exec(args[0]);
-    let profile: UserInfo;
-    if (!uid) profile = this.getUserInfo(message);
-    else {
-      if (message.guild?.members.cache.get(uid[0])?.user.bot)
-        return message.reply({
-          embeds: [CommandEmbed.error({ content: "User is bot." })]
-        });
-      profile = this.getUserInfoFromUID(message, uid[0]);
-    }
+    const user = await this.getUser(message, args[0]);
+    if (user?.bot)
+      return message.reply({ embeds: [CommandEmbed.error("User is bot.")] });
+    const profile = this.getUserInfoFromUID(message, user.id);
     message.reply({
       embeds: [
         CommandEmbed.success({

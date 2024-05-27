@@ -2,7 +2,7 @@ import { Message, CommandInteraction, CacheType, User } from "discord.js";
 import Command from "../../../core/Command";
 import CommandOptions from "../../../core/Command/CommandOptions";
 import CustomClient from "../../../core/CustomClient";
-import UserInfoCommand from "../../user/userInfo";
+import UserInfoCommand from "../userInfo";
 import CommandEmbed from "../../../core/Command/CommandEmbed";
 
 export default class ConvertBlocksCommand extends Command {
@@ -55,8 +55,13 @@ export default class ConvertBlocksCommand extends Command {
 
     const errorEmbed = [
       CommandEmbed.error({
-        title: "Не достаточно блоков!",
-        content: "Безобразие!!!11\nУ вас должно быть как минимум 10 блоков!"
+        title: "Недостаточно блоков!",
+        content:
+          "Безобразие!!!11\n" +
+          `Вам необходимо минимум еще ${
+            10 - profile.blockgame.blocks
+          } блоков.\n` +
+          "Курс обмена: 10 блоков на 1 монету."
       })
     ];
 

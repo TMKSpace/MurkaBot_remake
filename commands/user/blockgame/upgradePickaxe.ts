@@ -2,7 +2,7 @@ import { Message, CommandInteraction, CacheType } from "discord.js";
 import Command from "../../../core/Command";
 import CommandOptions from "../../../core/Command/CommandOptions";
 import CustomClient from "../../../core/CustomClient";
-import UserInfoCommand from "../../user/userInfo";
+import UserInfoCommand from "../userInfo";
 import CommandEmbed from "../../../core/Command/CommandEmbed";
 
 export default class UpgradePickaxeCommand extends Command {

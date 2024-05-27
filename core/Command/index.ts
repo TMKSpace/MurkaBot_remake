@@ -163,10 +163,13 @@ export default abstract class Command {
     return args;
   }
 
-  static getCommandByClass(client: CustomClient, Class: Command) {
+  static getCommandByClass<CommandType>(
+    client: CustomClient,
+    Class: Command
+  ): CommandType {
     const commands = client.prefCmd.concat(client.interCmd);
     return commands.find(
       (v) => v.constructor.name == Class.constructor.name
-    ) as Command;
+    ) as CommandType;
   }
 }
