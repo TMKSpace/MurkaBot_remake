@@ -4,6 +4,7 @@ import CommandOptions from "../../core/Command/CommandOptions";
 import CustomClient from "../../core/CustomClient";
 import UserInfoCommand from "./userInfo";
 import CommandEmbed from "../../core/Command/CommandEmbed";
+import PayHistoryCommand from "./paymentHistory";
 
 export default class PayCommand extends Command {
   constructor() {
@@ -37,6 +38,10 @@ export default class PayCommand extends Command {
       client,
       UserInfoCommand.prototype
     ) as UserInfoCommand;
+    const PayHistory = Command.getCommandByClass<PayHistoryCommand>(
+      client,
+      PayHistoryCommand.prototype
+    );
 
     if (!args[0] || !args[1])
       return message.reply({
@@ -48,10 +53,7 @@ export default class PayCommand extends Command {
         ]
       });
 
-    const users = await message.guild?.members.fetch();
-    const user =
-      users?.get(args[0])?.user ??
-      users?.find((user) => user.user.username == args[0]);
+    const user = await UserInfo.getTargetUser(message, args[0]);
     if (!user)
       return message.reply({
         embeds: [
@@ -125,5 +127,7 @@ export default class PayCommand extends Command {
         })
       ]
     });
+
+    PayHistory.createPayment(message, user, amount);
   }
 }

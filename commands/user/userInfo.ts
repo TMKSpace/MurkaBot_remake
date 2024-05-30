@@ -183,6 +183,20 @@ export default class UserInfoCommand extends Command {
       : this.getUserFromMessage(message);
   }
 
+  /** Returns target user. */
+  async getTargetUser(
+    message: Message | CommandInteraction,
+    userid: string
+  ): Promise<User | undefined> {
+    const users = await message.guild?.members.fetch();
+    if (/<@[0-9]+>/i.test(userid))
+      userid = /[0-9]+/i.exec(userid)?.[0] as string;
+    return (
+      users?.get(userid)?.user ??
+      users?.find((u) => u.user.username == userid)?.user
+    );
+  }
+
   private getUserFromMessage(message: Message | CommandInteraction) {
     return message instanceof Message ? message.author : message.user;
   }
