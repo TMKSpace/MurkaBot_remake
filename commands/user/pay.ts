@@ -5,6 +5,7 @@ import CustomClient from "../../core/CustomClient";
 import UserInfoCommand from "./userInfo";
 import CommandEmbed from "../../core/Command/CommandEmbed";
 import PayHistoryCommand from "./paymentHistory";
+import UserUtils from "../../core/UserUtils";
 
 export default class PayCommand extends Command {
   constructor() {
@@ -53,7 +54,7 @@ export default class PayCommand extends Command {
         ]
       });
 
-    const user = await UserInfo.getTargetUser(message, args[0]);
+    const user = await UserUtils.getTargetUser(message, args[0]);
     if (!user)
       return message.reply({
         embeds: [

@@ -4,6 +4,7 @@ import CommandOptions from "../../core/Command/CommandOptions";
 import CustomClient from "../../core/CustomClient";
 import UserInfoCommand from "./userInfo";
 import CommandEmbed from "../../core/Command/CommandEmbed";
+import UserUtils from "../../core/UserUtils";
 
 export default class BalanceCommand extends Command {
   constructor() {
@@ -27,7 +28,7 @@ export default class BalanceCommand extends Command {
       UserInfoCommand.prototype
     ) as UserInfoCommand;
 
-    const user = await userInfo.getUser(message, args[0]);
+    const user = await UserUtils.getUser(message, args[0]);
     const userid = user.id;
 
     if (!user)

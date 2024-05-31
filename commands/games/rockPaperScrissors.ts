@@ -10,6 +10,7 @@ import Command from "../../core/Command";
 import CommandOptions from "../../core/Command/CommandOptions";
 import CustomClient from "../../core/CustomClient";
 import UserInfoCommand from "../user/userInfo";
+import UserUtils from "../../core/UserUtils";
 
 export default class RockPaperScrissorsCommand extends Command {
   constructor() {
@@ -41,14 +42,9 @@ export default class RockPaperScrissorsCommand extends Command {
     args: string[],
     client: CustomClient
   ): Promise<any> {
-    const UserInfo = Command.getCommandByClass<UserInfoCommand>(
-      client,
-      UserInfoCommand.prototype
-    );
-
     const elements = ["rocks", "paper", "scissors"];
 
-    const user = UserInfo.getUser(message, args[0]);
+    const user = UserUtils.getUser(message, args[0]);
 
     const row = this.createButtonRow(...elements);
   }

@@ -5,6 +5,7 @@ import CustomClient from "../../core/CustomClient";
 import GuildCacheUtil from "../util/guildCache";
 import UserInfoCommand from "./userInfo";
 import CommandEmbed from "../../core/Command/CommandEmbed";
+import UserUtils from "../../core/UserUtils";
 
 export const provider = "ui_payhist";
 
@@ -45,12 +46,7 @@ export default class PayHistoryCommand extends Command {
     args: string[],
     client: CustomClient
   ): Promise<any> {
-    const UserInfo = Command.getCommandByClass<UserInfoCommand>(
-      client,
-      UserInfoCommand.prototype
-    );
-
-    const user = await UserInfo.getUser(message, args[0]);
+    const user = await UserUtils.getUser(message, args[0]);
     if (user.bot)
       return message.reply({
         embeds: [CommandEmbed.error("Пользователь - бот =/")]
@@ -69,6 +65,13 @@ export default class PayHistoryCommand extends Command {
         value: `${v.value} монет\n` + v.time
       }))
     );
+
+    if (!ReturnEmbed.data.fields?.length)
+      ReturnEmbed.addFields({
+        name: "Переводов не найдено",
+        value:
+          "Для перевода монет другим пользователям воспользуйтесь командой pay."
+      });
 
     message.reply({ embeds: [ReturnEmbed] });
   }

@@ -13,6 +13,7 @@ import {
   User
 } from "discord.js";
 import CommandEmbed from "../../core/Command/CommandEmbed";
+import UserUtils from "../../core/UserUtils";
 
 export class UserInfo {
   [index: string]: any;
@@ -168,39 +169,6 @@ export default class UserInfoCommand extends Command {
     return this.getUserInfoFromUID(message, userid);
   }
 
-  /** Returns user by userid or yourself. */
-  async getUser(
-    message: Message | CommandInteraction,
-    userid?: string
-  ): Promise<User> {
-    const users = await message.guild?.members.fetch();
-    if (userid && /<@[0-9]+>/i.test(userid))
-      userid = /[0-9]+/i.exec(userid)?.[0];
-    return userid
-      ? users?.get(userid)?.user ??
-          users?.find((u) => u.user.username == userid)?.user ??
-          this.getUserFromMessage(message)
-      : this.getUserFromMessage(message);
-  }
-
-  /** Returns target user. */
-  async getTargetUser(
-    message: Message | CommandInteraction,
-    userid: string
-  ): Promise<User | undefined> {
-    const users = await message.guild?.members.fetch();
-    if (/<@[0-9]+>/i.test(userid))
-      userid = /[0-9]+/i.exec(userid)?.[0] as string;
-    return (
-      users?.get(userid)?.user ??
-      users?.find((u) => u.user.username == userid)?.user
-    );
-  }
-
-  private getUserFromMessage(message: Message | CommandInteraction) {
-    return message instanceof Message ? message.author : message.user;
-  }
-
   private async loadUserData() {
     const dataFolder = this.getDataDir();
     const dataExtension = ".json";
@@ -232,7 +200,7 @@ export default class UserInfoCommand extends Command {
     args: string[],
     client: CustomClient
   ): Promise<any> {
-    const user = await this.getUser(message, args[0]);
+    const user = await UserUtils.getUser(message, args[0]);
     if (user?.bot)
       return message.reply({ embeds: [CommandEmbed.error("User is bot.")] });
     const profile = this.getUserInfoFromUID(message, user.id);

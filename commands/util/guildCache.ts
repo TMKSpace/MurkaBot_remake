@@ -13,11 +13,15 @@ import {
 import CommandEmbed from "../../core/Command/CommandEmbed";
 
 export default class GuildCacheUtil extends Command {
-  data: Map<string, Map<string, Map<string, string>>>; //
+  paths: Map<string, Map<string, Map<string, string>>>; // Регистр путей
+
+  private dataExtension: string;
 
   constructor() {
     super(new CommandOptions("util_guildcache").setName("GuildCache"));
-    this.data = new Map();
+
+    this.paths = new Map();
+    this.dataExtension = ".json";
 
     this.slashCommandInfo
       .setDescription("Shows server statistics.")
@@ -30,78 +34,12 @@ export default class GuildCacheUtil extends Command {
       .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
   }
 
+  // При запуске бота, подгрузка списка файлов в кеше.
   async onInit(client: CustomClient): Promise<void> {
     this.loadDataList();
-
-    //setInterval(async () => this.saveData, 60000);
   }
 
-  getGuildDataProviders(message: Message | CommandInteraction) {
-    if (!this.data.has(message.guildId as string))
-      this.data.set(message.guildId as string, new Map());
-    return this.data.get(message.guildId as string);
-  }
-
-  saveGuildData(
-    message: Message | CommandInteraction,
-    provider: string,
-    filename: string,
-    data: any
-  ) {
-    const dir = path.join(
-      this.getDataDir(),
-      message.guildId as string,
-      provider
-    );
-    const filepath = path.join(dir, filename + ".json");
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(filepath, JSON.stringify(data));
-  }
-
-  getGuildData<ReturnType = any>(
-    message: Message | CommandInteraction,
-    provider: string,
-    filename: string
-  ) {
-    const path = this.getGuildDataProviders(message)
-      ?.get(provider)
-      ?.get(filename);
-    if (path && fs.existsSync(path))
-      return JSON.parse(fs.readFileSync(path).toString()) as ReturnType;
-    return;
-  }
-
-  private async loadDataList() {
-    const dataFolder = this.getDataDir();
-    const dataExtension = ".json";
-    const files = scanDirectory(dataFolder, {
-      extensionFilters: [dataExtension]
-    });
-    files.forEach(async (file) => {
-      const fileData = file
-        .slice(dataFolder.length + 1)
-        .split(path.sep)
-        .map((v) =>
-          v.endsWith(dataExtension)
-            ? v.substring(0, v.length - dataExtension.length)
-            : v
-        );
-
-      const guildId = fileData[0];
-      const providerId = fileData[1];
-      const dataId = fileData[2];
-
-      if (!this.data.has(guildId)) this.data.set(guildId, new Map());
-      const guildData = this.data.get(guildId) as Map<
-        string,
-        Map<string, string>
-      >;
-      if (!guildData.has(providerId)) guildData.set(providerId, new Map());
-      const providerData = guildData.get(providerId) as Map<string, string>;
-      providerData.set(dataId, file);
-    });
-  }
-
+  // Зам запуск команды
   async run(
     message: CommandInteraction<CacheType> | Message<boolean>,
     args: string[],
@@ -148,5 +86,77 @@ export default class GuildCacheUtil extends Command {
     });
   }
 
-  async shutdown(): Promise<void> {}
+  /** Получение провайдеров сервера из сообщения. */
+  getGuildDataProviders(message: Message | CommandInteraction) {
+    if (!this.paths.has(message.guildId as string))
+      this.paths.set(message.guildId as string, new Map());
+    return this.paths.get(message.guildId as string);
+  }
+
+  /** Получение данных по сообщению, провайдеру и самому идентификатору данных */
+  getGuildData<ReturnType = any>(
+    message: Message | CommandInteraction,
+    provider: string,
+    filename: string
+  ) {
+    const path = this.getGuildDataProviders(message)
+      ?.get(provider)
+      ?.get(filename);
+    if (path && fs.existsSync(path))
+      return JSON.parse(fs.readFileSync(path).toString()) as ReturnType;
+    return;
+  }
+
+  /** Сохранение данных по сообщению, провайдеру и идентификатору данных */
+  saveGuildData(
+    message: Message | CommandInteraction,
+    provider: string,
+    filename: string,
+    data: any
+  ) {
+    const dir = path.join(
+      this.getDataDir(),
+      message.guildId as string,
+      provider
+    );
+    const filepath = path.join(dir, filename + this.dataExtension);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(filepath)) this.generateDataPathFor(filepath);
+    fs.writeFileSync(filepath, JSON.stringify(data));
+  }
+
+  /** Подгрузка списка путей */
+  private async loadDataList() {
+    const files = scanDirectory(this.getDataDir(), {
+      extensionFilters: [this.dataExtension]
+    });
+    files.forEach((v) => this.generateDataPathFor(v));
+  }
+
+  /** Добавление пути в переменную путей для дальнейшего корректного использования getGuildData */
+  private async generateDataPathFor(filepath: string) {
+    const dataFolder = this.getDataDir();
+
+    const fileData = filepath
+      .slice(dataFolder.length + 1)
+      .split(path.sep)
+      .map((v) =>
+        v.endsWith(this.dataExtension)
+          ? v.substring(0, v.length - this.dataExtension.length)
+          : v
+      );
+
+    const guildId = fileData[0];
+    const providerId = fileData[1];
+    const dataId = fileData[2];
+
+    if (!this.paths.has(guildId)) this.paths.set(guildId, new Map());
+    const guildData = this.paths.get(guildId) as Map<
+      string,
+      Map<string, string>
+    >;
+    if (!guildData.has(providerId)) guildData.set(providerId, new Map());
+    const providerData = guildData.get(providerId) as Map<string, string>;
+    providerData.set(dataId, filepath);
+  }
 }
