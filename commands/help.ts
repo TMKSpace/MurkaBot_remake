@@ -172,7 +172,7 @@ export default class HelpCommand extends Command {
     const collector = response.createMessageComponentCollector({
       componentType: ComponentType.StringSelect,
       filter: (i) => i.user.id == UserUtils.getUserFromMessage(message).id,
-      time: 10_000
+      time: 180_000
     });
 
     collector.on("collect", (i) => {
@@ -197,6 +197,12 @@ export default class HelpCommand extends Command {
                   }))
               )
               .setColor(color);
+
+      if (!embed.data.fields?.length)
+        embed.addFields({
+          name: "Не найдено",
+          value: "Вероятно в этой категории нет команд!"
+        });
 
       i.update({ embeds: [embed] });
     });
