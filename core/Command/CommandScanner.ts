@@ -27,6 +27,7 @@ export default class CommandScanner {
         try {
           const command = new (require(file).default)() as Command;
           if (!command.id) return;
+          command.path = file;
           return command;
         } catch (error) {
           this.logger.error(

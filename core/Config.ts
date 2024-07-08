@@ -1,4 +1,4 @@
-export default interface Config {
+export default class Config {
   bot: {
     token: string;
     prefix: string;
@@ -10,9 +10,7 @@ export default interface Config {
     commandPath: string;
     ignoredCommandDirs: string[];
   };
-}
 
-export default class Config {
   constructor() {
     this.bot = {
       token: "PlaceYourTokenHere",
@@ -23,7 +21,7 @@ export default class Config {
     this.settings = {
       autoDeploy: true,
       commandPath: "commands",
-      ignoredCommandDirs: [".lib", ".i", ".libs"]
+      ignoredCommandDirs: [".lib", ".i", "libs"]
     };
   }
 }

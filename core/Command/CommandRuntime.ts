@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, messageLink } from "discord.js";
+import { User } from "discord.js";
 import Config from "../Config";
 import CustomClient from "../CustomClient";
 import Logger from "../Logger";
@@ -17,18 +17,41 @@ export default class CommandRuntime {
 
   async listenSlashCommands() {
     return this.client.on("interactionCreate", async (interaction) => {
-      if (!interaction.isCommand()) return;
+      if (!interaction.isCommand() && !interaction.isAutocomplete()) return;
+
       const command = this.client.interCmd.get(interaction.commandName);
+
       if (!command) {
-        interaction.reply({
-          content: `Command ${interaction.commandName} doesn't exist!`,
-          ephemeral: true
-        });
+        if (!interaction.isAutocomplete())
+          interaction.reply({
+            embeds: [
+              CommandEmbed.error(
+                `Command ${interaction.commandName} doesn't exist!`
+              )
+            ],
+            ephemeral: true
+          });
         log.error(
           `No command matching "${interaction.commandName}" was found.`.gray
         );
         return;
       }
+
+      if (interaction.isAutocomplete()) {
+        return command.autocomplete(interaction, this.client).catch(log.error);
+      }
+
+      if (!this.checkIfUserCanUse(command, interaction.user)) {
+        interaction.reply({
+          embeds: [
+            CommandEmbed.error({
+              content: "You haven't permissions to use that command!"
+            })
+          ]
+        });
+        return;
+      }
+
       try {
         if (command.runSlash)
           command.runSlash(interaction, this.client).catch(log.error);
@@ -65,8 +88,9 @@ export default class CommandRuntime {
       if (!command) return;
 
       if (
-        command.prefixCommandInfo.permission &&
-        !msg.member?.permissions.has(command.prefixCommandInfo.permission)
+        (command.prefixCommandInfo.permission &&
+          !msg.member?.permissions.has(command.prefixCommandInfo.permission)) ||
+        !this.checkIfUserCanUse(command, msg.author)
       ) {
         msg.reply({
           embeds: [
@@ -88,5 +112,11 @@ export default class CommandRuntime {
         msg.reply("This command is not working...");
       }
     });
+  }
+
+  private checkIfUserCanUse(command: Command, user: User) {
+    const users = command.getUsers();
+    if (!users) return true;
+    return users.includes(user.id);
   }
 }

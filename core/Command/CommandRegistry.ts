@@ -18,9 +18,16 @@ export default class CommandRegistry {
     this.prefix = client.prefCmd;
     this.config = client.config;
     this.length = 0;
+
+    client.registry = this;
   }
 
-  registerCommand(command: Command) {
+  registerCommand(command: Command, client?: CustomClient) {
+    if (client) {
+      this.interaction = client.interCmd;
+      this.prefix = client.prefCmd;
+    }
+
     if (command.type.slash)
       this.interaction.set(command.slashCommandInfo.name, command);
 

@@ -3,7 +3,6 @@ import Command from "../../core/Command";
 import CommandOptions from "../../core/Command/CommandOptions";
 import CustomClient from "../../core/CustomClient";
 import GuildCacheUtil from "../util/guildCache";
-import UserInfoCommand from "./userInfo";
 import CommandEmbed from "../../core/Command/CommandEmbed";
 import UserUtils from "../../core/UserUtils";
 
@@ -31,9 +30,11 @@ export default class PayHistoryCommand extends Command {
   constructor() {
     super(new CommandOptions("payhistory", { prefix: true }));
 
-    this.slashCommandInfo.addUserOption((o) =>
-      o.setName("user").setDescription("User to check his payment history")
-    );
+    this.slashCommandInfo
+      .setDescription("Check your/another user payment history.")
+      .addUserOption((o) =>
+        o.setName("user").setDescription("User to check his payment history")
+      );
 
     this.prefixCommandInfo
       .addAlias("payhist")
