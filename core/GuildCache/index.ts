@@ -10,19 +10,28 @@ export default class GuildCacheUtil {
   private static dataExtension = ".json";
 
   /** Получение провайдеров и файлов провайдеров сервера из сообщения. */
-  static getGuildDataProviders(message: Message | CommandInteraction) {
+  static getGuildDataProviders(
+    message: Message | CommandInteraction
+  ): Map<string, Map<string, string>> {
     const guildDir = path.join(paths.data, message.guildId as string);
 
-    if (!fs.existsSync(guildDir)) fs.mkdirSync(guildDir);
+    if (!fs.existsSync(guildDir)) fs.mkdirSync(guildDir, { recursive: true });
 
     const providers = fs
       .readdirSync(guildDir)
-      .filter((fpath) => fs.lstatSync(fpath).isDirectory());
+      .filter((fpath) =>
+        fs.lstatSync(path.join(guildDir, fpath)).isDirectory()
+      );
     return new Map(
       providers.map((dir) => [
         dir,
         new Map(
-          fs.readdirSync(dir).map((fpath) => [path.basename(fpath), fpath])
+          fs
+            .readdirSync(path.join(guildDir, dir))
+            .map((file) => [
+              file.substring(0, file.length - this.dataExtension.length),
+              path.join(guildDir, dir, file)
+            ])
         )
       ])
     );
@@ -32,11 +41,10 @@ export default class GuildCacheUtil {
   static getGuildData<ReturnType = any>(
     message: Message | CommandInteraction,
     provider: string,
-    filename: string
+    name: string
   ): ReturnType | undefined {
-    const path = this.getGuildDataProviders(message)
-      ?.get(provider)
-      ?.get(filename);
+    const path = this.getGuildDataProviders(message)?.get(provider)?.get(name);
+
     if (path && fs.existsSync(path))
       return JSON.parse(fs.readFileSync(path).toString()) as ReturnType;
     return;

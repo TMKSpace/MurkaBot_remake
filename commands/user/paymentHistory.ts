@@ -2,9 +2,9 @@ import { Message, CommandInteraction, CacheType, User } from "discord.js";
 import Command from "../../core/Command";
 import CommandOptions from "../../core/Command/CommandOptions";
 import CustomClient from "../../core/CustomClient";
-import GuildCacheUtil from "../util/guildCache";
 import CommandEmbed from "../../core/Command/CommandEmbed";
 import UserUtils from "../../core/UserUtils";
+import GuildCacheUtil from "../../core/GuildCache";
 
 export const provider = "ui_payhist";
 
@@ -78,15 +78,14 @@ export default class PayHistoryCommand extends Command {
   }
 
   getUserPayments(message: Message | CommandInteraction, userid?: string) {
-    const guildCache = Command.getCommandByClass<GuildCacheUtil>(
-      message.client as CustomClient,
-      GuildCacheUtil.prototype
-    );
-
     const uid =
       userid ??
       (message instanceof Message ? message.author.id : message.user.id);
-    let payments = guildCache.getGuildData<Payments>(message, provider, uid);
+    let payments = GuildCacheUtil.getGuildData<Payments>(
+      message,
+      provider,
+      uid
+    );
     if (!payments) payments = { payments: [] };
     return payments;
   }
@@ -96,14 +95,10 @@ export default class PayHistoryCommand extends Command {
     payments: Payments,
     userid?: string
   ) {
-    const guildCache = Command.getCommandByClass<GuildCacheUtil>(
-      message.client as CustomClient,
-      GuildCacheUtil.prototype
-    );
     const uid =
       userid ??
       (message instanceof Message ? message.author.id : message.user.id);
-    guildCache.saveGuildData(message, provider, uid, payments);
+    GuildCacheUtil.saveGuildData(message, provider, uid, payments);
   }
 
   createPayment(
