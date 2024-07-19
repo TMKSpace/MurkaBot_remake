@@ -1,7 +1,6 @@
 import { Client, ClientOptions, Collection } from "discord.js";
 import Command from "./Command";
 import Config from "./Config";
-import CommandRegistry from "./Command/CommandRegistry";
 
 export default class CustomClient extends Client<true> {
   /** Interaction/Slash commands */
@@ -12,9 +11,6 @@ export default class CustomClient extends Client<true> {
   data: any[];
   /** Configuration of bot */
   config: Config;
-
-  /** Command registry */
-  registry: CommandRegistry | undefined;
 
   constructor(options: ClientOptions, config: Config) {
     super(options);

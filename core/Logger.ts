@@ -2,36 +2,27 @@ import "colors";
 
 export default class Logger {
   name: string;
-  private time: string;
+
+  private static get time() {
+    const dat = new Date();
+    return [dat.getHours(), dat.getMinutes(), dat.getSeconds()]
+      .map((i) => (i < 10 ? "0" + i : i))
+      .join(":");
+  }
 
   constructor(name = "") {
     this.name = name;
-    this.time = "";
   }
-  private resetTime = () => {
-    const dat = new Date();
-    const time = [dat.getHours(), dat.getMinutes(), dat.getSeconds()];
-    this.time = time
-      .map((i) => {
-        if (i.toString().length === 1) return "0" + i;
-        return i;
-      })
-      .join(":");
-    return this;
-  };
   info = (...data: any) => {
-    this.resetTime();
-    console.log(`[INFO ${this.time}]`, `[${this.name}]`, ...data);
+    console.log(`[INFO ${Logger.time}]`, `[${this.name}]`, ...data);
     return data.join(" ").toString();
   };
   warn = (...data: any) => {
-    this.resetTime();
-    console.log(`[WARN ${this.time}]`.yellow, `[${this.name}]`, ...data);
+    console.log(`[WARN ${Logger.time}]`.yellow, `[${this.name}]`, ...data);
     return data.join(" ").toString();
   };
   error = (...data: any) => {
-    this.resetTime();
-    console.log(`[ERROR ${this.time}]`.red, `[${this.name}]`, ...data);
+    console.log(`[ERROR ${Logger.time}]`.red, `[${this.name}]`, ...data);
     return data.join(" ").toString();
   };
 }

@@ -18,7 +18,7 @@ export default abstract class Command {
   /** Command name (console logger name) */
   name: string;
   /** Command description (for help command and etc) */
-  description() {
+  get description() {
     return this.slashCommandInfo.description;
   }
   /** Slash - Is slash command
@@ -32,8 +32,8 @@ export default abstract class Command {
   prefixCommandInfo: PrefixCommandBuilder;
 
   // Configuration and data
-  configFolder: string;
-  configName: string;
+  private configFolder: string;
+  private configName: string;
   private dataFolder: string;
 
   // Logger

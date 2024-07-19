@@ -31,7 +31,7 @@ class CommandHelp {
 
   constructor(command: Command) {
     this.aliases = {};
-    this.description = command.description();
+    this.description = command.description;
     this.category = "main";
 
     this.registerAliases(command);
@@ -228,10 +228,12 @@ export default class HelpCommand extends Command {
     return (
       // Описание
       `${cmd.description}\n` +
-      // Если есть, префиксы
-      (cmd.aliases.prefix ? `Prefix: \`${prefixAliases}\`\n` : "") +
-      // Если есть, слеш
-      (cmd.aliases.slash ? `Slash: ${slashAlias}\n` : "")
+        // Если есть, префиксы
+        cmd.aliases.prefix &&
+      `Prefix: \`${prefixAliases}\`\n` +
+        // Если есть, слеш
+        cmd.aliases.slash &&
+      `Slash: ${slashAlias}\n`
     );
   }
 
